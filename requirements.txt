@@ -1,0 +1,33 @@
+# DARF Framework Requirements
+# Core dependencies
+Flask==2.2.3
+prometheus-client==0.16.0
+asyncio==3.4.3
+aiohttp==3.8.4
+pyyaml==6.0.1
+numpy==1.24.3
+
+# Knowledge graph and data processing
+networkx==3.1.0
+pandas==2.0.0
+scikit-learn==1.2.2
+
+# Web UI and visualization
+Flask-SocketIO==5.3.3
+flask-cors==3.0.10
+plotly==5.14.1
+dash==2.9.3
+
+# Concurrency and async processing
+concurrent-futures-extra==1.0.6
+tenacity==8.2.2
+
+# Fuzzy logic
+scikit-fuzzy==0.4.2
+
+# LLM integration
+litellm==0.1.337
+
+# Optional but recommended
+uvicorn==0.21.1
+pytest==7.3.1

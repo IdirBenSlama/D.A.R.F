@@ -1,0 +1,24 @@
+{
+  "PORT": 5000,
+  "HOST": "0.0.0.0",
+  "DEBUG": true,
+  
+  "LOG_LEVEL": "INFO",
+  "LOG_FILE": "logs/darf_api.log",
+  
+  "CACHE_ENABLED": true,
+  "CACHE_TYPE": "memory",
+  "CACHE_TTL": 300,
+  
+  "AUTH_ENABLED": false,
+  "API_TOKENS_FILE": "api_tokens.json",
+  
+  "PROMETHEUS_URL": "http://localhost:9090",
+  "GRAFANA_URL": "http://localhost:3000",
+  
+  "DEFAULT_LLM_MODEL": "qwen2.5-coder:14b",
+  "OLLAMA_API_URL": "http://localhost:11434",
+  "MAX_CONVERSATION_HISTORY": 10,
+  
+  "ASYNC_ENABLED": false
+}

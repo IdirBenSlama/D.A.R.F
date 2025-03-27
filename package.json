@@ -1,0 +1,46 @@
+{
+  "name": "darf-framework",
+  "version": "1.0.0",
+  "description": "Distributed Autonomous Research Framework - A flexible platform for distributed AI research",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:frontend": "eslint darf_frontend/src",
+    "lint:backend": "eslint darf_webapp",
+    "test": "pytest tests/",
+    "test:watch": "pytest-watch tests/",
+    "test:coverage": "pytest --cov=src tests/ --cov-report=html",
+    "start": "python run.py",
+    "start:frontend": "python run.py --frontend",
+    "start:backend": "python run.py --backend",
+    "start:debug": "python run.py --mode debug",
+    "build": "cd darf_frontend && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/darf-framework.git"
+  },
+  "keywords": [
+    "distributed",
+    "ai",
+    "research",
+    "framework",
+    "knowledge-graph",
+    "llm",
+    "consensus"
+  ],
+  "author": "DARF Development Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.18.0",
+    "@typescript-eslint/parser": "^6.18.0",
+    "eslint": "^9.23.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0"
+  }
+}

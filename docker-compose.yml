@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  # Frontend service
+  darf-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: darf-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - darf-dashboard
+      - prometheus
+      - grafana
+    restart: unless-stopped
+    networks:
+      - darf-network
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  prometheus:
+    image: prom/prometheus:v2.51.0  # Using specific version instead of latest
+    container_name: darf-prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro  # Read-only mount
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    networks:
+      - darf-network
+    user: "65534:65534"  # Run as non-root user (nobody:nogroup)
+    security_opt:
+      - no-new-privileges:true
+    read_only: true  # Make container filesystem read-only
+    tmpfs:
+      - /tmp  # Mount temporary filesystem for runtime data
+    healthcheck:  # Add health check
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  grafana:
+    image: grafana/grafana:11.5.3  # Fixed version instead of latest
+    container_name: darf-grafana
+    volumes:
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro  # Read-only configuration
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro  # Read-only dashboards
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro  # Read-only provisioning
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - darf-network
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SECURITY_DISABLE_GRAVATAR=true
+      - GF_SECURITY_COOKIE_SECURE=true
+      - GF_SECURITY_STRICT_TRANSPORT_SECURITY=true
+    user: "472:0"  # Run as Grafana user
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  darf-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.darf.fixed  # Using our fixed Dockerfile
+    container_name: darf-dashboard
+    volumes:
+      - ./metrics:/app/metrics
+      - ./logs:/app/logs
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    networks:
+      - darf-network
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  darf-network:
+    driver: bridge
+
+volumes:
+  grafana-data:

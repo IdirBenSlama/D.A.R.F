@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARF API Interface</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .header {
+            background-color: #1976d2;
+            color: white;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+        }
+        .response-area {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .btn-primary {
+            background-color: #1976d2;
+            border-color: #1976d2;
+        }
+        .btn-primary:hover {
+            background-color: #1565c0;
+            border-color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>DARF API Interface</h1>
+            <p>Simple interface to interact with the DARF API</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <h3>API Health</h3>
+                    <p>Check if the API is running correctly</p>
+                    <button id="healthCheck" class="btn btn-primary">Check Health</button>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <h3>LLM Models</h3>
+                    <p>List available LLM models</p>
+                    <button id="listModels" class="btn btn-primary">List Models</button>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <h3>LLM Stats</h3>
+                    <p>Get LLM usage statistics</p>
+                    <button id="llmStats" class="btn btn-primary">Get Stats</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3>LLM Query</h3>
+            <p>Send a query to the LLM</p>
+            <div class="mb-3">
+                <label for="promptInput" class="form-label">Prompt</label>
+                <textarea id="promptInput" class="form-control" rows="3" placeholder="Enter your prompt here..."></textarea>
+            </div>
+            <button id="sendQuery" class="btn btn-primary">Send Query</button>
+        </div>
+
+        <div class="card mt-4">
+            <h3>Response</h3>
+            <div id="responseArea" class="response-area">Results will appear here...</div>
+        </div>
+    </div>
+
+    <script>
+        // Base URL for the API
+        const apiBaseUrl = 'http://localhost:5000';
+        
+        // Function to display response
+        function displayResponse(data) {
+            document.getElementById('responseArea').textContent = JSON.stringify(data, null, 2);
+        }
+        
+        // Function to handle errors
+        function handleError(error) {
+            document.getElementById('responseArea').textContent = `Error: ${error.message}`;
+            console.error('API Error:', error);
+        }
+        
+        // Health check
+        document.getElementById('healthCheck').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/health`);
+                const data = await response.json();
+                displayResponse(data);
+            } catch (error) {
+                handleError(error);
+            }
+        });
+        
+        // List models
+        document.getElementById('listModels').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/models`);
+                const data = await response.json();
+                displayResponse(data);
+            } catch (error) {
+                handleError(error);
+            }
+        });
+        
+        // LLM stats
+        document.getElementById('llmStats').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/llm/stats`);
+                const data = await response.json();
+                displayResponse(data);
+            } catch (error) {
+                handleError(error);
+            }
+        });
+        
+        // Send query
+        document.getElementById('sendQuery').addEventListener('click', async () => {
+            const prompt = document.getElementById('promptInput').value;
+            
+            if (!prompt) {
+                alert('Please enter a prompt');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/llm/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt
+                    })
+                });
+                
+                const data = await response.json();
+                displayResponse(data);
+            } catch (error) {
+                handleError(error);
+            }
+        });
+    </script>
+</body>
+</html>

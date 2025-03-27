@@ -1,0 +1,70 @@
+# Using specific version instead of generic slim
+FROM python:3.9.19-slim
+
+# Add labels for better maintainability
+LABEL maintainer="DARF Team"
+LABEL version="1.0.0"
+LABEL description="DARF Dashboard Application - Secured Version"
+
+# Create a non-root user to run the application
+RUN groupadd -r darf && useradd -r -g darf -m -s /bin/bash darf
+
+WORKDIR /app
+
+# Update and install security fixes for baseline packages
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    tini && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install dependencies
+COPY requirements_consolidated.txt .
+RUN pip install --no-cache-dir -r requirements_consolidated.txt && \
+    pip install --no-cache-dir safety  # Add safety package for dependency scanning
+
+# Run safety check on installed dependencies
+RUN safety check
+
+# Copy application code
+COPY --chown=darf:darf src/ ./src/
+COPY --chown=darf:darf darf_webapp/ ./darf_webapp/
+COPY --chown=darf:darf darf_consolidated_dashboard.py .
+COPY --chown=darf:darf metrics/ ./metrics/
+
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/logs && chown -R darf:darf /app/logs
+RUN mkdir -p /app/metrics && chown -R darf:darf /app/metrics
+
+# Create a health check endpoint script
+COPY --chown=darf:darf <<'EOF' /app/health_check.py
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/health')
+def health():
+    return 'OK', 200
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5001)
+EOF
+
+# Expose the ports
+EXPOSE 5000
+EXPOSE 5001
+
+# Switch to non-root user
+USER darf
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:5001/health || exit 1
+
+# Use tini as init to properly handle signals
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+# Start the DARF dashboard and health check server
+CMD ["sh", "-c", "python health_check.py & python darf_consolidated_dashboard.py"]

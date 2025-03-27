@@ -1,0 +1,52 @@
+{
+  "log_level": "INFO",
+  "open_browser": true,
+  "components": {
+    "knowledge_graph": {
+      "enabled": true,
+      "data_sources": ["datasets/processed"],
+      "cache_size": 10000,
+      "optimized": true
+    },
+    "event_bus": {
+      "enabled": true,
+      "high_availability": true,
+      "metrics_enabled": true,
+      "worker_threads": 4,
+      "queue_size": 1000,
+      "batch_size": 100
+    },
+    "llm_interface": {
+      "enabled": true,
+      "embedding_dim": 128,
+      "max_history": 50,
+      "cache_size": 1000,
+      "similarity_threshold": 0.6
+    },
+    "web_server": {
+      "enabled": true,
+      "port": 5000,
+      "host": "0.0.0.0",
+      "debug": false,
+      "timeout": 30
+    }
+  },
+  "metrics": {
+    "enabled": true,
+    "export_format": "json",
+    "prometheus_port": 9090,
+    "collection_interval": 15
+  },
+  "deployment": {
+    "environment": "production",
+    "max_retry_attempts": 3,
+    "retry_delay": 5,
+    "graceful_shutdown_timeout": 30
+  },
+  "performance": {
+    "thread_pool_size": 8,
+    "use_optimized_components": true,
+    "max_cache_size_mb": 512,
+    "timeout_seconds": 60
+  }
+}
